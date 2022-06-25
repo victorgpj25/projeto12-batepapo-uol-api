@@ -98,6 +98,26 @@ app.post("/messages", async (req, res) => {
     res.sendStatus(201);
 })
 
+app.get("/messages", async (req, res) => {
+    const user = req.headers.user
+    const allMessages = await db.collection("messages").find().toArray()
+
+    function isDisplayable (message) {
+        return (message.type === "message" || message.type === "status" || message.to === "Todos" || message.to === user || message.from === user)
+    }
+
+    const displayableMessages = allMessages.filter(isDisplayable).reverse()
+
+    if (req.query.limit) {
+        const limit = parseInt(req.query.limit)
+        const lastDisplayableMessages = displayableMessages.slice(0, limit)
+        res.send(lastDisplayableMessages)
+        return
+    }
+
+    res.send(displayableMessages)
+})
+
 
 
 

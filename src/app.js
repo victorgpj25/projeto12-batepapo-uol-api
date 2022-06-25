@@ -38,7 +38,7 @@ app.post("/participants", async (req, res) => {
 	}
 
     const validation = newParticipantSchema.validate(newParticipant)
-    
+
     if (validation.error) {
         console.log(validation.error.details)
         res.sendStatus(422)
@@ -55,6 +55,13 @@ app.post("/participants", async (req, res) => {
     db.collection("participants").insertOne(newParticipant)
     db.collection("messages").insertOne(newParticipantMessage)
     res.sendStatus(201);
+})
+
+app.get("/participants", async (req, res) => {
+
+    const allParticipants = await db.collection("participants").find().toArray()
+
+    res.send(allParticipants)
 })
 
 

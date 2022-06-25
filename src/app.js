@@ -18,12 +18,12 @@ mongoClient.connect().then(() => {
 	db = mongoClient.db("BatePapoUOL")
 })
 
-const newParticipantSchema = joi.object({
-    name: joi.string().required(),
-    lastStatus: joi.number()
-  })
-
 app.post("/participants", async (req, res) => {
+
+    const newParticipantSchema = joi.object({
+        name: joi.string().required(),
+        lastStatus: joi.number()
+    })
 
     const newParticipant = {
 		name: req.body.name,
@@ -63,6 +63,41 @@ app.get("/participants", async (req, res) => {
 
     res.send(allParticipants)
 })
+
+app.post("/messages", async (req, res) => {
+
+    const allParticipants = await db.collection("participants").find().toArray()
+    const participantsNames = []
+    allParticipants.map( participant => participantsNames.push(participant.name) )
+
+    const newMessageSchema = joi.object({
+        from: joi.string().valid(...participantsNames).required(),
+        to: joi.string().required(),
+        text: joi.string().required(),
+        type: joi.string().valid(...["message", "private_message"]).required(),
+        time: joi.string()
+    })
+
+    const newMessage = {
+        from: req.headers.user,
+        to: req.body.to,
+        text: req.body.text,
+        type: req.body.type, 
+        time: dayjs(Date.now()).format("HH:mm:ss")
+	}
+
+    const validation = newMessageSchema.validate(newMessage)
+
+    if (validation.error) {
+        console.log(validation.error.details)
+        res.sendStatus(422)
+        return
+    }
+
+    db.collection("messages").insertOne(newMessage)
+    res.sendStatus(201);
+})
+
 
 
 

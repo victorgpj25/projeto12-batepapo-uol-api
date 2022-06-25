@@ -118,6 +118,20 @@ app.get("/messages", async (req, res) => {
     res.send(displayableMessages)
 })
 
+app.post("/status", async (req, res) => {
+    const user = await db.collection("participants").findOne({ name: req.headers.user })
+    if (!user) {
+        res.sendStatus(404)
+        return
+    }
+
+    await db.collection("participants").updateOne({ 
+        _id: user._id 
+    }, { $set: {lastStatus: Date.now()} })
+            
+    res.sendStatus(200)
+})
+
 
 
 

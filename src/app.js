@@ -106,7 +106,7 @@ app.get("/messages", async (req, res) => {
         return (message.type === "message" || message.type === "status" || message.to === "Todos" || message.to === user || message.from === user)
     }
 
-    const displayableMessages = allMessages.filter(isDisplayable).reverse()
+    const displayableMessages = allMessages.filter(isDisplayable)
 
     if (req.query.limit) {
         const limit = parseInt(req.query.limit)

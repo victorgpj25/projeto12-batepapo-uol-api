@@ -132,7 +132,22 @@ app.post("/status", async (req, res) => {
     res.sendStatus(200)
 })
 
+setInterval(removeInactiveParticipants, 15000)
 
+async function removeInactiveParticipants () {
+    const inactiveParticipants = await db.collection("participants").find({lastStatus: {$lt: Date.now() - 10000} }).toArray()
+    inactiveParticipants.map(participant => {
+        const removedParticipantMessage = {
+            from: participant.name,
+            to: "Todos",
+            text: "sai da sala...",
+            type: "status", 
+            time: dayjs(Date.now()).format("HH:mm:ss")
+        }
+        db.collection("messages").insertOne(removedParticipantMessage)
+        db.collection("participants").deleteOne({name: participant.name})
+    })
+}
 
 
 
